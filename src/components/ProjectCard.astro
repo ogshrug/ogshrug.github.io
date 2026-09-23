@@ -1,0 +1,25 @@
+---
+import Icon from './Icon.astro'
+import type { Project } from '../data/profile'
+
+interface Props { p: Project; i?: number }
+const { p, i = 0 } = Astro.props
+const href = p.live ?? p.repo
+---
+<article class="card" style={`--i:${i}`}>
+  <div class="card-head">
+    <h3>{p.name}</h3>
+    <span class="year">{p.year}</span>
+  </div>
+  {p.badge && <span class="badge">★ {p.badge}</span>}
+  <p>{p.blurb}</p>
+  {p.metric && <div class="metric">{p.metric}</div>}
+  <div class="card-foot">
+    <div class="tags">{p.tags.map((t) => <span class="tag">{t}</span>)}</div>
+    <div class="links">
+      {p.repo && <a href={p.repo} target="_blank" rel="noopener"><Icon name="github" size={14} /> Code</a>}
+      {p.live && <a href={p.live} target="_blank" rel="noopener"><Icon name="arrow" size={14} /> Live</a>}
+      {!href && <span class="year">private</span>}
+    </div>
+  </div>
+</article>

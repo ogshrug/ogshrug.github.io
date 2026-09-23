@@ -1,0 +1,82 @@
+---
+// Quiet generative background: a dot field displaced by slow, interfering
+// ripples, a nod to acoustic waves (AcousticLeakNet). Like antfu's plum art,
+// it sits behind the content and fades out toward the bottom.
+---
+<canvas id="bg" aria-hidden="true"></canvas>
+<script>
+  const canvas = document.getElementById('bg') as HTMLCanvasElement
+  const ctx = canvas.getContext('2d')!
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const GAP = 26
+  let w = 0, h = 0, dpr = 1, t = 0, raf = 0
+
+  // two drifting sources whose ripples interfere
+  const sources = [
+    { x: 0.2, y: 0.15, f: 0.055, s: 0.9 },
+    { x: 0.85, y: 0.35, f: 0.045, s: 0.7 },
+  ]
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2)
+    w = window.innerWidth
+    h = window.innerHeight
+    canvas.width = w * dpr
+    canvas.height = h * dpr
+    canvas.style.width = w + 'px'
+    canvas.style.height = h + 'px'
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  }
+
+  function frame() {
+    const dark = document.documentElement.classList.contains('dark')
+    ctx.clearRect(0, 0, w, h)
+    ctx.fillStyle = dark ? '#ffffff' : '#000000'
+    const sx = sources.map((s, i) => ({
+      x: (s.x + Math.sin(t * 0.0003 + i * 2) * 0.08) * w,
+      y: (s.y + Math.cos(t * 0.00025 + i) * 0.06) * h,
+      f: s.f,
+      s: s.s,
+    }))
+    for (let y = GAP / 2 + 0.5; y < h; y += GAP) {
+      for (let x = GAP / 2 + 0.5; x < w; x += GAP) {
+        let amp = 0
+        for (const s of sx) {
+          const d = Math.hypot(x - s.x, y - s.y)
+          amp += (Math.sin(d * s.f * 0.35 - t * 0.0022) * s.s) / (1 + d * 0.004)
+        }
+        // dots stay pixel-locked (no sub-pixel drift = no shimmer); the
+        // ripple only modulates size and opacity
+        const pos = Math.max(0, amp)
+        ctx.globalAlpha = (dark ? 0.14 : 0.16) + pos * 0.22
+        ctx.beginPath()
+        ctx.arc(x, y, 1 + pos * 0.6, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+    ctx.globalAlpha = 1
+  }
+
+  function loop(ts: number) {
+    t = ts
+    frame()
+    raf = requestAnimationFrame(loop)
+  }
+
+  resize()
+  window.addEventListener('resize', () => {
+    resize()
+    if (reduce) frame()
+  })
+  new MutationObserver(() => frame()).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  })
+  document.addEventListener('visibilitychange', () => {
+    if (reduce) return
+    if (document.hidden) cancelAnimationFrame(raf)
+    else raf = requestAnimationFrame(loop)
+  })
+  if (reduce) frame()
+  else raf = requestAnimationFrame(loop)
+</script>

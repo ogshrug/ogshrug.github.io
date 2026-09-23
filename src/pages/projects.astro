@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro'
+import { projectGroups } from '../data/profile'
+---
+<Base title="Projects" description="Things Armaan Guha has built: AI/ML research, security tools and web apps.">
+  <h1 class="page-title">Projects</h1>
+  <p class="page-sub">A list of things I've built, grouped by what they're about.</p>
+
+  {projectGroups.map((g, gi) => (
+    <div class="year-block" style={`--i:${gi}`}>
+      <span class="ghost-year">{g.title}</span>
+      <div class="plist">
+        {g.items.map((p) => (
+          <a class="pitem" href={p.live ?? p.repo} target="_blank" rel="noopener">
+            <div class="n">
+              {p.name}
+              {p.badge && <span class="badge">★ {p.badge}</span>}
+            </div>
+            <p class="b">{p.blurb}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  ))}
+</Base>

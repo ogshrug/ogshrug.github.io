@@ -1,0 +1,105 @@
+---
+import '../styles/global.css'
+import Icon from '../components/Icon.astro'
+import Background from '../components/Background.astro'
+import { profile } from '../data/profile'
+
+interface Props { title?: string; description?: string }
+const {
+  title,
+  description = `${profile.name}: student, researcher and builder working on AI and cybersecurity.`,
+} = Astro.props
+const pageTitle = title ? `${title} · ${profile.name}` : profile.name
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const path = Astro.url.pathname.replace(base, '').replace(/\/$/, '') || '/'
+const nav = [
+  { href: '/projects', label: 'Projects' },
+  { href: '/posts', label: 'Writing' },
+  { href: '/#timeline', label: 'Timeline', cls: 'hide-sm' },
+]
+---
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(`${base}${profile.ogImage}`, Astro.site).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Armaan Guha, AI & Cybersecurity" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="sitemap" href={`${base}/sitemap-index.xml`} />
+    <script is:inline>
+      ;(function () {
+        var s = null
+        try { s = localStorage.getItem('theme') } catch (e) {}
+        // dark by default; only an explicit choice via the toggle switches to light
+        var dark = s !== 'light'
+        document.documentElement.classList.toggle('dark', dark)
+      })()
+    </script>
+  </head>
+  <body>
+    <Background />
+    <header class="nav">
+      <div class="wrap">
+        <a href={`${base}/`} class="logo" aria-label="Home">ag.</a>
+        <nav class="nav-links">
+          {nav.map((n) => (
+            <a
+              href={`${base}${n.href}`}
+              class={n.cls}
+              aria-current={path.startsWith(n.href) ? 'page' : undefined}
+            >
+              {n.label}
+            </a>
+          ))}
+          <a href={`${base}${profile.resume}`} target="_blank" rel="noopener">Resume</a>
+          <span class="nav-sep hide-sm"></span>
+          <a href={profile.socials[0].href} target="_blank" rel="noopener" aria-label="GitHub" class="icon">
+            <Icon name="github" />
+          </a>
+          <a href={profile.socials[1].href} target="_blank" rel="noopener" aria-label="LinkedIn" class="icon hide-sm">
+            <Icon name="linkedin" />
+          </a>
+          <button id="theme" aria-label="Toggle dark mode">
+            <span class="i-sun"><Icon name="sun" /></span>
+            <span class="i-moon"><Icon name="moon" /></span>
+          </button>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <div class="wrap slide-enter">
+        <slot />
+      </div>
+    </main>
+    <footer>
+      <div class="wrap">
+        <span>© {new Date().getFullYear()} {profile.name} · {profile.location}</span>
+        <span><a href={`mailto:${profile.email}`}>{profile.email}</a></span>
+      </div>
+    </footer>
+    <style is:global>
+      .i-moon { display: none; }
+      :root.dark .i-sun { display: none; }
+      :root.dark .i-moon { display: inline-flex; }
+    </style>
+    <script>
+      document.getElementById('theme')?.addEventListener('click', () => {
+        const root = document.documentElement
+        const apply = () => {
+          const dark = root.classList.toggle('dark')
+          try { localStorage.setItem('theme', dark ? 'dark' : 'light') } catch {}
+        }
+        if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply()
+        document.startViewTransition(apply)
+      })
+    </script>
+  </body>
+</html>

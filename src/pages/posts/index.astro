@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro'
+import { getCollection } from 'astro:content'
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+)
+const byYear = Map.groupBy(posts, (p) => p.data.date.getFullYear())
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+---
+<Base title="Writing" description="Notes and write-ups by Armaan Guha.">
+  <h1 class="page-title">Writing</h1>
+  <p class="page-sub">Notes on research, projects and things I'm learning.</p>
+
+  {[...byYear].map(([year, list], i) => (
+    <div class="year-block" style={`--i:${i}`}>
+      <span class="ghost-year">{year}</span>
+      <ul class="post-list">
+        {list.map((p) => (
+          <li>
+            <a href={`${base}/posts/${p.id}`}>
+              <span class="t">{p.data.title}</span>
+              <span class="d">{fmt(p.data.date)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</Base>

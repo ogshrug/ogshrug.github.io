@@ -1,0 +1,22 @@
+---
+import { timeline } from '../data/profile'
+---
+{timeline.map((block) => (
+  <div class="year-block">
+    <span class="ghost-year">{block.year}</span>
+    <ul class="tl">
+      {block.items.map((it) => (
+        <li>
+          <div class="tl-row">
+            <span>
+              <span class="tl-title">{it.title}</span>
+              <span class="tl-org"> · {it.org}</span>
+            </span>
+            {it.when && <span class="tl-when">{it.when}</span>}
+          </div>
+          {it.note && <p class="tl-note">{it.note}</p>}
+        </li>
+      ))}
+    </ul>
+  </div>
+))}

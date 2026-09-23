@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro'
+import Icon from '../components/Icon.astro'
+import ProjectCard from '../components/ProjectCard.astro'
+import Timeline from '../components/Timeline.astro'
+import { profile, featured } from '../data/profile'
+import { getCollection } from 'astro:content'
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const posts = (await getCollection('posts', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3)
+const words = ['listen', 'respond', 'recognize']
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+---
+<Base>
+  <section class="hero" style="--i:0">
+    <div class="hero-top">
+      <img class="avatar" src={`${base}${profile.avatar}`} alt={profile.name} width="56" height="56" />
+      <div class="hero-meta">
+        <span class="dot-live"></span>
+        <span>{profile.location}</span>
+        <span>·</span>
+        <span>{profile.tagline}</span>
+      </div>
+    </div>
+
+    <h1>
+      Hi, I'm Armaan. <br />I build things that{' '}
+      <span class="rotator serif" aria-label="listen, respond, recognize">
+        {words.map((w, i) => <span class={i === 0 ? 'w on' : 'w'} aria-hidden="true">{w}.</span>)}
+      </span>
+    </h1>
+
+    <p>
+      I'm a student at <strong>Delhi Public School Noida</strong> working on{' '}
+      <strong>deep learning</strong> and <strong>cybersecurity</strong>. I've built an acoustic
+      leak detector trained on 100M+ rows of simulated data, a malware analysis sandbox, and
+      a daily quiz app for my school. I like taking an idea from paper to prototype to something
+      that works in the real world.
+    </p>
+
+    <a class="highlight" href={`${base}/projects`}>
+      <span class="star">★</span>
+      <span>
+        GENIUS Olympiad 2026 Finalist
+        <small>AcousticLeakNet was 1 of 27 projects selected from India</small>
+      </span>
+    </a>
+
+    <div class="socials">
+      <a class="pill" href={profile.socials[0].href} target="_blank" rel="noopener"><Icon name="github" size={14} /> ogshrug</a>
+      <a class="pill" href={profile.socials[1].href} target="_blank" rel="noopener"><Icon name="linkedin" size={14} /> LinkedIn</a>
+      <a class="pill" href={`${base}${profile.resume}`} download="Armaan-Guha-Resume.pdf"><Icon name="download" size={14} /> Resume</a>
+      <button class="pill copy-email" data-email={profile.email}>
+        <span class="ic-copy"><Icon name="copy" size={14} /></span>
+        <span class="ic-check" hidden><Icon name="check" size={14} /></span>
+        <span class="lbl">{profile.email}</span>
+      </button>
+    </div>
+  </section>
+
+  <section style="--i:1">
+    <p class="eyebrow">Selected work</p>
+    <div class="cards">
+      {featured.map((p, i) => <ProjectCard p={p} i={i} />)}
+    </div>
+    <a class="see-all" href={`${base}/projects`}>All projects →</a>
+  </section>
+
+  <section id="timeline" style="--i:2">
+    <p class="eyebrow">Timeline</p>
+    <Timeline />
+  </section>
+
+  {posts.length > 0 && (
+    <section style="--i:3">
+      <p class="eyebrow">Writing</p>
+      <ul class="post-list">
+        {posts.map((p) => (
+          <li>
+            <a href={`${base}/posts/${p.id}`}>
+              <span class="t">{p.data.title}</span>
+              <span class="d">{fmt(p.data.date)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section style="--i:4">
+    <div class="contact">
+      <h2>Let's build something.</h2>
+      <p>Research collaborations, competitions, internships, or just a good problem. My inbox is open.</p>
+      <div class="socials">
+        <a class="pill" href={`mailto:${profile.email}`}><Icon name="mail" size={14} /> Say hi</a>
+        <a class="pill" href={profile.socials[1].href} target="_blank" rel="noopener"><Icon name="linkedin" size={14} /> Connect</a>
+        <a class="pill" href={`${base}${profile.resume}`} download="Armaan-Guha-Resume.pdf"><Icon name="download" size={14} /> Resume</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // headline word rotator: listen → respond → recognize
+  const rot = document.querySelector('.rotator')
+  if (rot) {
+    const ws = [...rot.querySelectorAll<HTMLElement>('.w')]
+    let cur = 0
+    setInterval(() => {
+      if (document.hidden) return
+      const prev = ws[cur]
+      cur = (cur + 1) % ws.length
+      prev.classList.remove('on')
+      prev.classList.add('out')
+      ws[cur].classList.remove('out')
+      ws[cur].classList.add('on')
+      setTimeout(() => prev.classList.remove('out'), 600)
+    }, 2600)
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.copy-email').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const lbl = btn.querySelector('.lbl')!
+      const original = lbl.textContent
+      try {
+        await navigator.clipboard.writeText(btn.dataset.email!)
+        lbl.textContent = 'Copied!'
+      } catch {
+        location.href = `mailto:${btn.dataset.email}`
+        return
+      }
+      btn.querySelector<HTMLElement>('.ic-copy')!.hidden = true
+      btn.querySelector<HTMLElement>('.ic-check')!.hidden = false
+      setTimeout(() => {
+        lbl.textContent = original
+        btn.querySelector<HTMLElement>('.ic-copy')!.hidden = false
+        btn.querySelector<HTMLElement>('.ic-check')!.hidden = true
+      }, 1600)
+    })
+  })
+</script>

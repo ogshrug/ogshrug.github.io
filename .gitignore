@@ -1,0 +1,8 @@
+ABOUT.md
+Profile.pdf
+node_modules/
+dist/
+.astro/
+.DS_Store
+profile.png
+*_Resume.docx.pdf
