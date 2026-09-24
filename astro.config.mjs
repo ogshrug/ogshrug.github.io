@@ -1,9 +1,9 @@
 import { defineConfig } from 'astro/config'
 import sitemap from '@astrojs/sitemap'
 
-// Served from https://ogshrug.github.io/ (user site, so no base path).
+// Served from https://armaanguha.com/ (custom domain on GitHub Pages).
 export default defineConfig({
-  site: 'https://ogshrug.github.io',
+  site: 'https://armaanguha.com',
   base: '/',
   trailingSlash: 'ignore',
   integrations: [sitemap()],

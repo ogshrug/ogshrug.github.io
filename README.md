@@ -13,4 +13,4 @@ npm run build
 - **Blog posts**: add a Markdown file to `src/content/posts/`
 - **Styles**: `src/styles/global.css`
 - **Deploy**: pushes to `main` publish to GitHub Pages via `.github/workflows/deploy.yml`.
-  Live at https://ogshrug.github.io/
+  Live at https://armaanguha.com/ (custom domain set in public/CNAME and repo Pages settings).
