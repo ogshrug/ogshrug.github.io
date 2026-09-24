@@ -41,9 +41,9 @@ export const featured: Project[] = [
   {
     name: 'YEMU',
     blurb:
-      'Offline malware analysis sandbox with a GTK4 GUI. Runs samples in isolated QEMU/KVM VMs, watches their behaviour and scores threats with YARA.',
-    metric: 'strace + tcpdump monitoring · YARA static & memory scans · PDF/JSON reports',
-    tags: ['Python', 'QEMU/KVM', 'YARA', 'GTK4'],
+      'Malware analysis sandbox for Linux and Windows, built at GPCSSI. Runs a sample in a disposable QEMU VM, watches its behaviour and network traffic, scans it with YARA, and explains a 0–100 threat score. Qt desktop app and CLI.',
+    metric: 'KVM + WHPX backends · static & in-memory YARA · v0.6.1 installers for Windows & Linux',
+    tags: ['Python', 'QEMU', 'YARA', 'PySide6'],
     repo: 'https://github.com/ogshrug/YEMU',
     year: 2026,
   },
