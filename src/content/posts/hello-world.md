@@ -17,4 +17,3 @@ model.fit(simulation)   # 8 networks
 model.eval(reality)     # 3 unseen networks → AUROC 1.00
 ```
 
-To add a post, drop a Markdown file into `src/content/posts/`.
