@@ -104,6 +104,7 @@ export const timeline: { year: string; items: TimelineItem[] }[] = [
   {
     year: '2026',
     items: [
+      { title: 'President', org: 'eSpice · Delhi Public School, Noida', when: '2026 – 27' },
       { title: 'Cyber Security Intern', org: 'Haryana Police · Gurugram', when: 'Jun – Jul', note: 'Gurugram Police Cyber Security Summer Internship (GPCSSI), certified.' },
       { title: 'Winner', org: 'Syntax ’26', when: '', note: 'Spotify 1980, a retro record store web app.' },
       {
@@ -118,7 +119,7 @@ export const timeline: { year: string; items: TimelineItem[] }[] = [
   {
     year: '2025',
     items: [
-      { title: 'Joint Secretary', org: 'Delhi Public School Noida', when: 'Sep – present' },
+      { title: 'Joint Secretary', org: 'eSpice · Delhi Public School, Noida', when: '2025 – 26' },
       { title: 'KrishiMitra', org: 'Inter DPS Digital Project Showcase', when: '' },
     ],
   },
