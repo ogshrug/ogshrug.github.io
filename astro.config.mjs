@@ -6,7 +6,8 @@ export default defineConfig({
   site: 'https://armaanguha.com',
   base: '/',
   trailingSlash: 'ignore',
-  integrations: [sitemap()],
+  // /cm is a private, unlisted page: keep it out of the sitemap
+  integrations: [sitemap({ filter: (page) => !/^\/cm\/?$/.test(new URL(page).pathname) })],
   markdown: {
     shikiConfig: { themes: { light: 'vitesse-light', dark: 'vitesse-dark' } },
   },

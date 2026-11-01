@@ -1,0 +1,141 @@
+---
+// Private link vault. Content is AES-GCM encrypted (see scripts/cm-encrypt.mjs);
+// only ciphertext is in the repo and the page. Not linked anywhere, noindex, left out of the sitemap.
+import '../styles/global.css'
+
+const found = import.meta.glob('../data/cm.enc.json', { eager: true, import: 'default' })
+const blob = Object.values(found)[0] ?? null
+---
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <title>·</title>
+    <script is:inline>
+      try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark') } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <main>
+      <div class="wrap cm">
+        <form id="lock" autocomplete="off">
+          <input id="pw" type="password" placeholder="Password" aria-label="Password" autofocus />
+          <button type="submit">Unlock</button>
+          <p id="msg" role="status"></p>
+        </form>
+        <div id="out" hidden></div>
+      </div>
+    </main>
+
+    <script type="application/json" id="cm-data" set:html={JSON.stringify(blob)} />
+
+    <script>
+      const data = JSON.parse(document.getElementById('cm-data')!.textContent || 'null')
+      const form = document.getElementById('lock') as HTMLFormElement
+      const pw = document.getElementById('pw') as HTMLInputElement
+      const msg = document.getElementById('msg')!
+      const out = document.getElementById('out')!
+
+      type Link = { group?: string; title: string; url: string; note?: string }
+      const unb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0))
+
+      async function decrypt(password: string): Promise<Link[]> {
+        const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey'])
+        const key = await crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt: unb64(data.salt), iterations: data.iter, hash: 'SHA-256' },
+          base,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['decrypt'],
+        )
+        const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(data.iv) }, key, unb64(data.ct))
+        return JSON.parse(new TextDecoder().decode(pt))
+      }
+
+      function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, cls?: string) {
+        const e = document.createElement(tag)
+        if (text) e.textContent = text
+        if (cls) e.className = cls
+        return e
+      }
+
+      function render(links: Link[]) {
+        const groups = new Map<string, Link[]>()
+        for (const l of links) {
+          const g = l.group || 'Links'
+          if (!groups.has(g)) groups.set(g, [])
+          groups.get(g)!.push(l)
+        }
+        out.replaceChildren()
+        for (const [name, items] of groups) {
+          const sec = el('section')
+          sec.append(el('h2', name))
+          const ul = el('ul')
+          for (const l of items) {
+            const li = el('li')
+            let safe = false
+            try { safe = ['https:', 'http:'].includes(new URL(l.url).protocol) } catch {}
+            const a = el('a', l.title || l.url, 'u')
+            if (safe) { a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer' }
+            li.append(a)
+            if (l.note) li.append(el('span', l.note, 'note'))
+            ul.append(li)
+          }
+          sec.append(ul)
+          out.append(sec)
+        }
+        const lock = el('button', 'Lock', 'lockbtn')
+        lock.onclick = () => location.reload()
+        out.append(lock)
+      }
+
+      if (!data) {
+        msg.textContent = 'Nothing stored yet.'
+        pw.disabled = true
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        if (!data || !pw.value) return
+        msg.textContent = 'Decrypting…'
+        try {
+          const links = await decrypt(pw.value)
+          pw.value = ''
+          form.hidden = true
+          render(links)
+          out.hidden = false
+        } catch {
+          msg.textContent = 'Wrong password.'
+          pw.select()
+        }
+      })
+    </script>
+
+    <style>
+      .cm { max-width: 560px; padding-top: 18vh; padding-bottom: 4rem; }
+      #lock { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+      #lock input {
+        flex: 1; min-width: 0; padding: 0.6rem 0.8rem; font: inherit;
+        background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 8px;
+      }
+      #lock input:focus { outline: none; border-color: var(--accent); }
+      button {
+        padding: 0.6rem 1rem; font: inherit; cursor: pointer;
+        background: var(--accent-soft); color: var(--accent); border: 1px solid transparent; border-radius: 8px;
+      }
+      #msg { width: 100%; margin: 0.25rem 0 0; color: var(--muted); font-size: 0.9rem; min-height: 1.5em; }
+      #out h2 {
+        font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--muted); margin: 2rem 0 0.5rem; font-weight: 500;
+      }
+      #out section:first-child h2 { margin-top: 0; }
+      #out ul { list-style: none; padding: 0; margin: 0; }
+      #out li { padding: 0.35rem 0; border-bottom: 1px solid var(--line); display: flex; gap: 0.75rem; align-items: baseline; flex-wrap: wrap; }
+      #out .note { color: var(--faint); font-size: 0.85rem; }
+      .lockbtn { margin-top: 2rem; }
+    </style>
+  </body>
+</html>
