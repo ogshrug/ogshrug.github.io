@@ -74,7 +74,6 @@ export const featured: Project[] = [
       'Daily question-of-the-day quiz. Players sign in with Google and answer the day’s question, admins post new ones, and answers are graded automatically with manual override.',
     metric: 'Google auth · keyword auto-grading in a Postgres trigger · row-level security',
     tags: ['React', 'Vite', 'Supabase', 'Postgres'],
-    repo: 'https://github.com/ogshrug/Enigma-QOTD',
     live: 'https://dailyquizdpsn.vercel.app/',
     year: 2026,
   },
